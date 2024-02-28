@@ -115,53 +115,34 @@ const getAllProperties = function (options, limit = 10) {
     SELECT properties.*, avg(property_reviews.rating) as average_rating
     FROM properties
     JOIN property_reviews ON properties.id = property_id
+    WHERE 1=1
   `;
 
   if (options.city) {
     queryParams.push(`%${options.city}%`);
-    queryString += ' WHERE city LIKE $' + queryParams.length + ' ';
+    queryString += `AND city LIKE $${queryParams.length} `;
   }
 
   // Filter by owner_id
   if (options.owner_id) {
-    if (queryParams.length > 1) {
-      queryString += ' AND ';
-    } else {
-      queryString += ' WHERE ';
-    }
     queryParams.push(options.owner_id);
-    queryString += 'owner_id = $' + queryParams.length + ' ';
+    queryString += `AND owner_id = $${queryParams.length} `;
   }
 
   // Filter by minimum and maximum price per night
   if (options.minimum_price_per_night) {
-    if (queryParams.length > 1) {
-      queryString += ' AND ';
-    } else {
-      queryString += ' WHERE ';
-    }
     queryParams.push(options.minimum_price_per_night * 100); // Convert to cents
-    queryString += 'cost_per_night >= $' + queryParams.length + ' ';
+    queryString += `AND cost_per_night >= $${queryParams.length} `;
   }
   if (options.maximum_price_per_night) {
-    if (queryParams.length > 1) {
-      queryString += ' AND ';
-    } else {
-      queryString += ' WHERE ';
-    }
     queryParams.push(options.maximum_price_per_night * 100); // Convert to cents
-    queryString += 'cost_per_night <= $' + queryParams.length + ' ';
+    queryString += `AND cost_per_night <= $${queryParams.length} `;
   }
 
   // Filter by minimum rating
   if (options.minimum_rating) {
-    if (queryParams.length > 1) {
-      queryString += ' AND ';
-    } else {
-      queryString += ' WHERE ';
-    }
     queryParams.push(options.minimum_rating);
-    queryString += 'property_reviews.rating >= $' + queryParams.length + ' ';
+    queryString += `HAVING avg(property_reviews.rating) >= $${queryParams.length} `;
   }
 
   queryParams.push(limit);
@@ -174,6 +155,7 @@ const getAllProperties = function (options, limit = 10) {
   console.log(queryString, queryParams);
   return pool.query(queryString, queryParams).then((res) => res.rows);
 };
+
 
 
 
