@@ -69,7 +69,7 @@ const addUser = function (user) {
     return result.rows[0]; // Return the first row (the newly inserted user)
   })
   .catch((err) => {
-    throw err; // Re-throwing the error to propagate it further
+    console.log(err.message);
   });
 
 };
